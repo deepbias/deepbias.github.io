@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deep and Shallow Biases in Language Models</title>
+<meta name="description" content="Deep and Shallow Biases in Language Models — EMNLP 2026 (in progress). Page under construction.">
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --muted: #6b6b6b;
+    --accent: #b8352f;
+    --border: #e7e5e0;
+    --pill-bg: #fdf3e7;
+    --pill-fg: #8a5a1c;
+    --pill-border: #f0ddb8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14120f;
+      --fg: #f2f0ec;
+      --muted: #a49e93;
+      --accent: #e2766e;
+      --border: #2c2822;
+      --pill-bg: #2a2015;
+      --pill-fg: #eec27e;
+      --pill-border: #4a3a20;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+  }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Georgia", "Iowan Old Style", "Times New Roman", serif;
+    padding: 6vh 1.5rem;
+  }
+  main {
+    max-width: 640px;
+    width: 100%;
+    text-align: center;
+  }
+  .venue {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 1.1rem;
+  }
+  h1 {
+    font-size: clamp(1.7rem, 4.2vw, 2.6rem);
+    line-height: 1.28;
+    font-weight: 700;
+    margin: 0 0 1.3rem;
+    letter-spacing: -0.01em;
+  }
+  .authors {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.98rem;
+    color: var(--muted);
+    margin-bottom: 2.4rem;
+  }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--pill-fg);
+    background: var(--pill-bg);
+    border: 1px solid var(--pill-border);
+    border-radius: 999px;
+    padding: 0.5rem 1.1rem;
+    margin-bottom: 2.6rem;
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--pill-fg);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+  .note {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.6;
+    border-top: 1px solid var(--border);
+    padding-top: 1.6rem;
+    margin-top: 0.4rem;
+  }
+  footer {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 2.4rem;
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="venue">EMNLP 2026 &middot; Submission in progress</div>
+  <h1>Deep and Shallow Biases in Language Models</h1>
+  <div class="authors">Author names withheld for double-blind review</div>
+  <div class="status"><span class="dot"></span> Under construction</div>
+  <p class="note">
+    This page reserves the project site for our upcoming EMNLP&nbsp;2026 submission.
+    The paper, code, and data links will be published here once the work is finalized.
+  </p>
+  <footer>&copy; 2026</footer>
+</main>
+</body>
+</html>
