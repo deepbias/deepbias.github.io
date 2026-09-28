@@ -15,6 +15,8 @@
   var GROUPS = [['deep', 'Deep bias'], ['shallow', 'Shallow bias']];
   var current = 0;
   var shownPi = 0;
+  var selected = null;   // framed answer highlighted in the reframing list
+  var listOpen = false;  // the list stays hidden until the reader asks for it
 
   function $(sel) { return root.querySelector(sel); }
   function el(tag, cls, text) {
@@ -62,6 +64,16 @@
     render();
   });
 
+  $('#ex-toggle').addEventListener('click', function () {
+    if (listOpen) {
+      selected = null;
+      highlight(null);
+      setOpen(false);
+    } else {
+      setOpen(true);
+    }
+  });
+
   function colorFor(answer, top, framedTop, framed) {
     if (answer === null) return 'is-other';
     if (answer === top) return 'is-top';
@@ -69,7 +81,7 @@
   }
 
   // One dot per sample, grouped by answer, popping in one after another.
-  function drawDots(container, bars, colorOf) {
+  function drawDots(container, bars, colorOf, onPick) {
     container.innerHTML = '';
     var i = 0;
     bars.forEach(function (b) {
@@ -77,13 +89,18 @@
         var d = el('span', 'ex-dot ' + colorOf(b[0]));
         d.style.animationDelay = (i * DOT_STEP) + 'ms';
         d.title = b[0] === null ? 'other answer' : b[0];
+        d.dataset.answer = b[0] === null ? '' : b[0];
+        if (onPick && b[0] !== null) {
+          d.classList.add('is-clickable');
+          d.addEventListener('click', onPick.bind(null, b[0]));
+        }
         container.appendChild(d);
         i++;
       }
     });
   }
 
-  function drawBars(container, bars, rows, colorOf) {
+  function drawBars(container, bars, rows, colorOf, onPick) {
     container.innerHTML = '';
     var fills = [];
     for (var i = 0; i < rows; i++) {
@@ -100,6 +117,17 @@
         row.appendChild(label);
         row.appendChild(track);
         row.appendChild(el('span', 'ex-count', b[1]));
+        row.dataset.answer = b[0] === null ? '' : b[0];
+        if (onPick && b[0] !== null) {
+          row.classList.add('is-clickable');
+          row.setAttribute('role', 'button');
+          row.setAttribute('tabindex', '0');
+          row.setAttribute('aria-label', 'Show reframings answered ' + b[0]);
+          row.addEventListener('click', onPick.bind(null, b[0]));
+          row.addEventListener('keydown', function (answer, e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(answer); }
+          }.bind(null, b[0]));
+        }
         fills.push([fill, b[1]]);
       }
       container.appendChild(row);
@@ -110,6 +138,53 @@
         fills.forEach(function (f) { f[0].style.width = (100 * f[1] / N) + '%'; });
       });
     });
+  }
+
+  // Highlight one answer's bar and dots in the reframing panel (null clears it).
+  function highlight(answer) {
+    [].forEach.call(root.querySelectorAll('#ex-framed .ex-row, #ex-framed-dots .ex-dot'), function (n) {
+      var on = answer !== null && n.dataset.answer === answer;
+      n.classList.toggle('is-selected', on);
+      n.classList.toggle('is-dimmed', answer !== null && !on);
+    });
+  }
+
+  function setOpen(open) {
+    listOpen = open;
+    $('#ex-behind').hidden = !open;
+    var btn = $('#ex-toggle');
+    btn.setAttribute('aria-expanded', open);
+    btn.querySelector('span').textContent = open ? 'Hide reframings' : 'Show all 30 reframings';
+    btn.classList.toggle('is-open', open);
+  }
+
+  // Fill the list with all 30 reframings and the model's answer to each.
+  function drawList(p, colorOf) {
+    var n = selected === null ? 0 : p.reframings.filter(function (x) { return x[2] === selected; }).length;
+    var title = $('#ex-behind-title');
+    title.innerHTML = '';
+    title.appendChild(document.createTextNode('All 30 reframings and the model\u2019s answer'));
+    if (selected !== null) {
+      title.appendChild(document.createTextNode(' \u00b7 highlighting '));
+      title.appendChild(el('span', 'ex-chip ' + colorOf(selected), selected));
+      title.appendChild(document.createTextNode(' (' + n + ' of 30)'));
+    }
+    var ol = $('#ex-behind-list');
+    ol.innerHTML = '';
+    var first = null;
+    p.reframings.forEach(function (x, i) {
+      var li = el('li', 'ex-item');
+      if (selected !== null) li.classList.add(x[2] === selected ? 'is-selected' : 'is-dimmed');
+      li.style.animationDelay = (REDUCED ? 0 : Math.min(i, 20) * 20) + 'ms';
+      li.appendChild(el('span', 'ex-item-text', x[0]));
+      var ans = el('span', 'ex-chip ' + colorOf(x[2]), x[1]);
+      ans.title = x[1];
+      li.appendChild(ans);
+      ol.appendChild(li);
+      if (first === null && selected !== null && x[2] === selected) first = li;
+    });
+    ol.scrollTop = 0;
+    if (first) ol.scrollTop = first.offsetTop - ol.offsetTop - 6;
   }
 
   function render() {
@@ -123,12 +198,21 @@
     $('#ex-prompt-text').textContent = '“' + p.prompt + '.”';
     $('#ex-framing').textContent = '“' + p.framing + '”';
 
+    var pick = function (answer) {
+      selected = selected === answer ? null : answer;  // clicking again clears the highlight
+      highlight(selected);
+      setOpen(true);
+      drawList(p, framed);
+    };
     drawDots($('#ex-direct-dots'), p.d, direct);
-    drawDots($('#ex-framed-dots'), p.f, framed);
+    drawDots($('#ex-framed-dots'), p.f, framed, pick);
     // Pad both panels to the same number of rows so the bars line up side by side.
     var rows = Math.max(p.d.length, p.f.length);
     drawBars($('#ex-direct'), p.d, rows, direct);
-    drawBars($('#ex-framed'), p.f, rows, framed);
+    drawBars($('#ex-framed'), p.f, rows, framed, pick);
+    // New question: clear the highlight; keep the list open if the reader opened it.
+    selected = null;
+    drawList(p, framed);
 
     var drN = Math.round(p.dr * N), frN = Math.round(p.fr * N);
     countTo(0, drN, 700, function (v) {

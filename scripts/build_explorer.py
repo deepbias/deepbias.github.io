@@ -3,13 +3,16 @@
 Usage:
   python3 scripts/build_explorer.py <dir> static/js/explorer-data.js
 
-<dir> must hold outputs/olmo3_7b_sft.jsonl and framings/train.jsonl (saved as
-framings.jsonl) from https://huggingface.co/datasets/anvo25/deep-bias.
+<dir> must hold these files from https://huggingface.co/datasets/anvo25/deep-bias:
+  olmo3_7b_sft.jsonl             (outputs/olmo3_7b_sft.jsonl)
+  framings.jsonl                 (framings/train.jsonl)
+  raw_olmo_framed.jsonl.gz       (raw/olmo3_7b_sft/framed.jsonl.gz)
 
 Prompts were hand-picked so that the Olmo-3-7B-SFT answers shown are real
 members of the asked category, the bars agree exactly with DR and FR, and each
 prompt clearly shows a Deep or a Shallow bias.
 """
+import gzip
 import json
 import sys
 
@@ -60,6 +63,37 @@ for line in open(f"{HF}/framings.jsonl"):
         framings.setdefault(r["id"], []).append(r["framing"])
 
 
+# Per-reframing responses, to list all 30 reframings with the model's answer.
+responses = {}
+with gzip.open(f"{HF}/raw_olmo_framed.jsonl.gz", "rt") as fh:
+    for line in fh:
+        r = json.loads(line)
+        if r["id"] in ids:
+            responses.setdefault(r["id"], []).append(r)
+
+
+def all_reframings(r, named):
+    """All 30 reframings in order, as [reframing text, answer shown, bar it belongs to or None].
+
+    Answers in a named bar are shown by the bar's label; the rest (pooled as
+    "others" in the bars) are shown as the model's raw response.
+    """
+    cluster_of = {}
+    for c in r["framed"]["distribution"]:
+        for form in c["surface_forms"]:
+            cluster_of.setdefault(form["text"], c["answer"])
+    out = []
+    for x in sorted(responses[r["id"]], key=lambda x: x["framing_idx"]):
+        a = cluster_of.get(x["response"], cluster_of.get(x["response"].strip()))
+        assert a is not None, (r["id"], x["response"])
+        if a in named:
+            out.append([x["framing"], a, a])
+        else:
+            out.append([x["framing"], x["response"].strip(), None])
+    assert len(out) == N, r["id"]
+    return out
+
+
 def bars(dist, keep=None):
     """Named bars for answers given at least twice, plus one pooled "others" bar."""
     shown = [d for d in dist if d["count"] >= MIN_COUNT][:MAX_BARS]
@@ -93,10 +127,16 @@ for pid in ids:
     key = PREFERRED_FRAMING.get(pid)
     framing = next((x for x in named if key and key in x.lower()), named[len(named) // 2])
 
+    fbars = bars(f, keep=top)
+    named = [a for a, _ in fbars if a is not None]
+    reframings = all_reframings(r, named)
+    for a, c in fbars:
+        assert sum(1 for x in reframings if x[2] == a) == c, (pid, a, c)
+
     prompts.append({"id": pid, "prompt": r["prompt"], "group": group, "framing": framing,
                     "top": top, "dr": round(r["direct"]["dr"], 4), "fr": round(r["framed"]["fr"], 4),
                     "pi": round(r["pi"], 4), "type": r["bias_type"],
-                    "d": bars(d), "f": bars(f, keep=top)})
+                    "d": bars(d), "f": fbars, "reframings": reframings})
 
 data = {"source": "https://huggingface.co/datasets/anvo25/deep-bias", "model": "Olmo-3-7B-SFT",
         "prompts": prompts}

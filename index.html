@@ -17,14 +17,14 @@
   <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=20260928f">
+  <link rel="stylesheet" href="./static/css/index.css?v=20260928k">
   <link rel="icon" href="./static/images/favicon.svg">
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script defer src="./static/js/fontawesome.all.min.js"></script>
   <script src="./static/js/bulma-carousel.min.js"></script>
   <script src="./static/js/bulma-slider.min.js"></script>
-  <script src="./static/js/index.js?v=20260928f"></script>
+  <script src="./static/js/index.js?v=20260928k"></script>
 </head>
 <body>
 
@@ -120,7 +120,7 @@
 </section>
 
 <!-- Teaser. -->
-<section class="hero teaser">
+<section class="hero teaser" id="tldr">
   <div class="container is-max-desktop">
     <div class="hero-body">
       <h2 class="subtitle has-text-centered">
@@ -142,7 +142,7 @@
       <div class="column is-four-fifths content">
 
         <!-- Hook. -->
-        <h2 class="title is-3">A butterfly and a number</h2>
+        <h2 class="title is-3" id="story">A butterfly and a number<a class="anchor" href="#story" aria-label="Link to this section"><i class="fas fa-link"></i></a></h2>
         <p>
           Ask Olmo-3-7B-SFT to <i>choose a random popular butterfly</i> 30 times, and it answers
           <b>Monarch</b> every single time. Ask it to <i>choose a random number</i>, and it answers
@@ -173,7 +173,7 @@
         </figure>
 
         <!-- Method. -->
-        <h2 class="title is-3">Measuring how deep a bias goes</h2>
+        <h2 class="title is-3" id="method">Measuring how deep a bias goes<a class="anchor" href="#method" aria-label="Link to this section"><i class="fas fa-link"></i></a></h2>
         <p>
           We turn this intuition into two numbers per question, each measured on 30 samples:
         </p>
@@ -206,11 +206,11 @@
   <div class="hero-body">
     <div class="container is-max-desktop explorer" id="explorer">
       <div class="has-text-centered">
-        <h2 class="title is-3">Try it yourself</h2>
+        <h2 class="title is-3" id="explore">Explore real answers<a class="anchor" href="#explore" aria-label="Link to this section"><i class="fas fa-link"></i></a></h2>
         <p class="subtitle is-6">
           Real Olmo-3-7B-SFT answers from our
           <a href="https://huggingface.co/datasets/anvo25/deep-bias">released dataset</a>.
-          Pick a question and compare the two panels.
+          Pick a question, then click an answer to read the reframings behind it.
         </p>
       </div>
 
@@ -243,11 +243,24 @@
           <div class="ex-panel">
             <p class="ex-heading">30 scenario reframings, for example</p>
             <p class="ex-quote" id="ex-framing"></p>
-            <div class="ex-dots" id="ex-framed-dots" aria-hidden="true"></div>
+            <div class="ex-dots" id="ex-framed-dots"></div>
             <div id="ex-framed"></div>
+            <p class="ex-hint"><span class="icon is-small"><i class="fas fa-hand-pointer"></i></span> Click an answer to see its reframings</p>
             <p class="ex-rate" id="ex-fr"></p>
           </div>
         </div>
+      </div>
+
+      <div class="has-text-centered">
+        <button class="button is-small is-rounded ex-toggle" id="ex-toggle" type="button"
+                aria-expanded="false" aria-controls="ex-behind">
+          <span>Show all 30 reframings</span>
+          <span class="icon is-small"><i class="fas fa-chevron-down"></i></span>
+        </button>
+      </div>
+      <div class="ex-behind" id="ex-behind" hidden>
+        <p class="ex-behind-title" id="ex-behind-title"></p>
+        <ol class="ex-behind-list" id="ex-behind-list"></ol>
       </div>
 
       <div class="ex-readout has-text-centered">
@@ -286,7 +299,7 @@
 
         <!-- Finding 1. -->
         <p class="finding-label">Finding 1</p>
-        <h2 class="title is-3">Most biases are shallow</h2>
+        <h2 class="title is-3" id="most-biases-are-shallow">Most biases are shallow<a class="anchor" href="#most-biases-are-shallow" aria-label="Link to this section"><i class="fas fa-link"></i></a></h2>
         <p>
           Across four post-SFT models, 35.8% to 77.7% of our questions look biased under direct
           prompting. But only about a quarter of these biases survive reframing: on average, 13.2% of
@@ -307,7 +320,7 @@
 
         <!-- Finding 2. -->
         <p class="finding-label">Finding 2</p>
-        <h2 class="title is-3">Deep biases are set early, in pretraining</h2>
+        <h2 class="title is-3" id="set-in-pretraining">Deep biases are set early, in pretraining<a class="anchor" href="#set-in-pretraining" aria-label="Link to this section"><i class="fas fa-link"></i></a></h2>
         <p>
           Where do these biases come from? Olmo 3 releases a checkpoint after every training
           stage, so we ran the same test on each one. The pretrained model is already biased on
@@ -423,7 +436,7 @@
 
         <!-- Finding 3. -->
         <p class="finding-label">Finding 3</p>
-        <h2 class="title is-3">Deep biases are harder to remove</h2>
+        <h2 class="title is-3" id="harder-to-remove">Deep biases are harder to remove<a class="anchor" href="#harder-to-remove" aria-label="Link to this section"><i class="fas fa-link"></i></a></h2>
         <p>
           If Deep biases are more stable, they should also be harder to fix. We tried two ways of
           making Olmo-3-7B-SFT more diverse. The first, <a href="https://arxiv.org/abs/2507.19457">GEPA</a>, searches for a better system prompt.
@@ -464,7 +477,7 @@
         </figure>
 
         <!-- Discussion. -->
-        <h2 class="title is-3">Why this matters</h2>
+        <h2 class="title is-3" id="why-it-matters">Why this matters<a class="anchor" href="#why-it-matters" aria-label="Link to this section"><i class="fas fa-link"></i></a></h2>
         <p>
           Our questions are deliberately low-stakes, but the distinction is not. In hiring,
           medicine, or law, the same question can be asked in many ways. If a hiring assistant
@@ -484,7 +497,7 @@
         </p>
 
         <!-- Open questions. -->
-        <h2 class="title is-3">Open questions</h2>
+        <h2 class="title is-3" id="open-questions">Open questions<a class="anchor" href="#open-questions" aria-label="Link to this section"><i class="fas fa-link"></i></a></h2>
         <ul>
           <li>
             <b>Where do most biases come from?</b> We can trace a biased answer to one training
@@ -500,7 +513,7 @@
         </ul>
 
         <!-- Conclusion. -->
-        <h2 class="title is-3">Conclusion</h2>
+        <h2 class="title is-3" id="conclusion">Conclusion<a class="anchor" href="#conclusion" aria-label="Link to this section"><i class="fas fa-link"></i></a></h2>
         <p>
           A model repeating an answer is not the same as a model holding a preference. Bias
           evaluation should measure not only whether a model repeats an answer, but also whether
@@ -519,7 +532,7 @@
   <div class="container is-max-desktop">
     <div class="columns is-centered">
       <div class="column is-four-fifths content">
-        <h2 class="title is-3">Citation</h2>
+        <h2 class="title is-3" id="citation">Citation<a class="anchor" href="#citation" aria-label="Link to this section"><i class="fas fa-link"></i></a></h2>
         <pre><code>@inproceedings{vo2026deepbias,
   title     = {Deep and shallow biases in language models},
   author    = {Vo, An and Dang, Vy Tuong and Nguyen, Khai-Nguyen and Villa-Cueva, Emilio and Solorio, Thamar and Nguyen, Anh Totti and Kim, Daeyoung},
@@ -544,8 +557,8 @@
   </div>
 </footer>
 
-<script src="./static/js/explorer-data.js?v=20260928f"></script>
-<script src="./static/js/explorer.js?v=20260928f"></script>
+<script src="./static/js/explorer-data.js?v=20260928k"></script>
+<script src="./static/js/explorer.js?v=20260928k"></script>
 
 </body>
 </html>
