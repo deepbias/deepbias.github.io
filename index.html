@@ -17,14 +17,14 @@
   <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=20260928k">
+  <link rel="stylesheet" href="./static/css/index.css?v=20260928p">
   <link rel="icon" href="./static/images/favicon.svg">
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script defer src="./static/js/fontawesome.all.min.js"></script>
   <script src="./static/js/bulma-carousel.min.js"></script>
   <script src="./static/js/bulma-slider.min.js"></script>
-  <script src="./static/js/index.js?v=20260928k"></script>
+  <script src="./static/js/index.js?v=20260928p"></script>
 </head>
 <body>
 
@@ -64,8 +64,12 @@
             <sup>*</sup>Equal contribution &nbsp;&nbsp; <sup>&dagger;</sup>Equal advising
           </div>
 
-          <div class="is-size-5 publication-venue">
-            The 2026 Conference on Empirical Methods in Natural Language Processing (EMNLP 2026)
+          <div class="publication-venue">
+            <img class="venue-logo" src="./static/images/emnlp_2026_logo.png"
+                 alt="EMNLP 2026 Budapest" width="1000" height="174"/>
+            <p class="venue-name">
+              The 2026 Conference on Empirical Methods in Natural Language Processing (EMNLP 2026)
+            </p>
           </div>
 
           <div class="column has-text-centered">
@@ -130,6 +134,16 @@
         pretraining and are harder to remove than prompt-dependent
         <span class="shallow-word">Shallow biases</span>.
       </h2>
+      <figure class="post-figure teaser-figure">
+        <img src="./static/images/main_pipeline.png"
+             alt="Bias evaluation framework. Deep bias example: Choose a random popular butterfly, where Monarch survives reframing. Shallow bias example: Choose a random number, where 42 does not survive reframing."/>
+        <figcaption>
+          <b>Figure 1.</b> We ask the direct question 30 times to find the model's top answer,
+          then ask 30 matched scenario reframings and check whether that answer returns.
+          (a) Monarch survives reframing: a Deep bias. (b) 42 does not survive, and the answers
+          shift to 3: a Shallow bias.
+        </figcaption>
+      </figure>
     </div>
   </div>
 </section>
@@ -161,16 +175,6 @@
           A score computed from a single prompt cannot tell them apart. We call the first kind a
           <b>Deep bias</b> and the second a <b>Shallow bias</b>.
         </p>
-        <figure class="post-figure is-wide">
-          <img src="./static/images/main_pipeline.png"
-               alt="Bias evaluation framework. Deep bias example: Choose a random popular butterfly, where Monarch survives reframing. Shallow bias example: Choose a random number, where 42 does not survive reframing."/>
-          <figcaption>
-            <b>Figure 1.</b> We ask the direct question 30 times to find the model's top answer,
-            then ask 30 matched scenario reframings and check whether that answer returns.
-            (a) Monarch survives reframing: a Deep bias. (b) 42 does not survive, and the answers
-            shift to 3: a Shallow bias.
-          </figcaption>
-        </figure>
 
         <!-- Method. -->
         <h2 class="title is-3" id="method">Measuring how deep a bias goes<a class="anchor" href="#method" aria-label="Link to this section"><i class="fas fa-link"></i></a></h2>
@@ -557,8 +561,8 @@
   </div>
 </footer>
 
-<script src="./static/js/explorer-data.js?v=20260928k"></script>
-<script src="./static/js/explorer.js?v=20260928k"></script>
+<script src="./static/js/explorer-data.js?v=20260928p"></script>
+<script src="./static/js/explorer.js?v=20260928p"></script>
 
 </body>
 </html>
