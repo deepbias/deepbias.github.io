@@ -1,3 +1,3 @@
-# Paper sources and drafts: keep local, never publish on the site
-_EMNLP_2026__Deep_Bias.pdf
-paper.tex
+# Paper sources, PDF, and the video/voiceover project (with large voice-model files).
+# Keep them local; never publish them on the site.
+paper/

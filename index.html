@@ -448,6 +448,42 @@
           training example.
         </p>
 
+        <h3 class="title is-4" id="number-seven">A harder case: the number 7<a class="anchor" href="#number-seven" aria-label="Link to this section"><i class="fas fa-link"></i></a></h3>
+        <p>
+          Take <i>Choose a random number from 1 to 10</i>. The pretrained model spreads its picks
+          across 3, 5, and 7, but after SFT, 7 takes over: 26 of 30 samples. Searching all 2.15M
+          Dolci-Instruct-SFT examples turns up only two requests like this one, and both answer 7.
+        </p>
+        <div class="box trace-box">
+          <div class="columns">
+            <div class="column">
+              <p class="is-size-7">Training example &middot; source: WildChat</p>
+              <p class="trace-quote"><b>User:</b> &ldquo;select a number 1-10&rdquo;</p>
+              <p class="trace-quote"><b>Assistant:</b> &ldquo;Sure! I select 7.&rdquo;</p>
+            </div>
+            <div class="column">
+              <p class="is-size-7">Training example &middot; source: WildChat</p>
+              <p class="trace-quote"><b>User:</b> &ldquo;pick a random number from 1 to 11&rdquo;</p>
+              <p class="trace-quote"><b>Assistant:</b> &ldquo;Sure! Here is a random number from 1 to 11: 7&rdquo;</p>
+            </div>
+          </div>
+        </div>
+        <p>
+          So we removed those two examples and re-ran SFT from the same pretrained model. The
+          retrained model is still biased toward 7. The reason is that 7 is everywhere in the SFT
+          data, far beyond requests for a random number:
+        </p>
+        <ul>
+          <li>as the example value in code: <i>&ldquo;int num = 7; // let's use 7 as the given number to compare&rdquo;</i></li>
+          <li>as a magic number: <i>&ldquo;Sample Output: The magic number is: 7.&rdquo;</i></li>
+          <li>as a favorite number in math problems: <i>&ldquo;Emily&rsquo;s favorite number is 7.&rdquo;</i> and <i>&ldquo;The ninja&rsquo;s favorite number is 7.&rdquo;</i></li>
+          <li>as a lucky number: <i>&ldquo;&hellip; their lucky number, which is 7.&rdquo;</i> and <i>&ldquo;A sum is considered &lsquo;lucky&rsquo; if it equals 7.&rdquo;</i></li>
+        </ul>
+        <p>
+          With the signal spread across so many examples, it is hard to tell which ones caused the
+          bias, and removing the two direct matches was not enough. The same is true for most biases.
+        </p>
+
         <!-- Finding 3. -->
         <p class="finding-label">Finding 3</p>
         <h2 class="title is-3" id="harder-to-remove">Deep biases are harder to remove<a class="anchor" href="#harder-to-remove" aria-label="Link to this section"><i class="fas fa-link"></i></a></h2>
@@ -516,7 +552,9 @@
           <li>
             <b>Where do most biases come from?</b> We can trace a biased answer to one training
             example only in rare cases. For most biases, the cause is likely spread across many
-            examples. Attributing bias to such diffuse patterns is an open problem.
+            examples, as with <a href="#number-seven">the number 7</a>, where removing the only two
+            matching examples and re-running SFT left the bias in place. Attributing bias to such
+            diffuse patterns is an open problem.
           </li>
           <li>
             <b>Does this hold where the stakes are high?</b> We did not measure harms directly,
