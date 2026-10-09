@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=20260928p">
+  <link rel="stylesheet" href="./static/css/index.css?v=20261009a">
   <link rel="icon" href="./static/images/favicon.svg">
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -94,6 +94,16 @@
                   <span>Paper</span>
                 </a>
               </span>
+              <!-- Video Link. -->
+              <span class="link-block">
+                <a href="https://www.youtube.com/watch?v=tthWCGz4Nv4"
+                   class="external-link button is-normal is-rounded is-dark" target="_blank" rel="noopener noreferrer">
+                  <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                </a>
+              </span>
               <!-- arXiv Link. -->
               <span class="link-block">
                 <a href="https://arxiv.org/abs/2609.09901"
@@ -154,6 +164,16 @@
           shift to 3: a Shallow bias.
         </figcaption>
       </figure>
+      <div class="video-block" id="video">
+        <p class="video-title">Watch the 3-minute explainer</p>
+        <div class="video-frame">
+          <iframe src="https://www.youtube-nocookie.com/embed/tthWCGz4Nv4?rel=0"
+                  title="Not all AI biases are equal: Deep and shallow biases in language models (EMNLP 2026)"
+                  loading="lazy" allowfullscreen
+                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -184,6 +204,19 @@
           One of these is a stable preference. The other depended on how the question was worded.
           A score computed from a single prompt cannot tell them apart. We call the first kind a
           <b>Deep bias</b> and the second a <b>Shallow bias</b>.
+        </p>
+        <p>
+          That a model keeps returning the same answer is well documented: GPT-4o picks 7 about 70% of
+          the time when asked for a random number (<a href="https://arxiv.org/abs/2505.18545" target="_blank" rel="noopener noreferrer">B-score</a>),
+          Llama-2-13B-chat favors 5 when picking between one and ten
+          (<a href="https://arxiv.org/abs/2404.10859" target="_blank" rel="noopener noreferrer">Forcing Diffuse Distributions</a>),
+          asked for a short joke, models return near-duplicates of the same few jokes
+          (<a href="https://arxiv.org/abs/2504.05228" target="_blank" rel="noopener noreferrer">NoveltyBench</a>), and
+          asked for a metaphor about time, 25 different models converge on &ldquo;time is a river&rdquo;
+          or &ldquo;time is a weaver&rdquo;
+          (<a href="https://arxiv.org/abs/2510.22954" target="_blank" rel="noopener noreferrer">Artificial Hivemind</a>).
+          Each of these studies asks a question one fixed way, so none can say whether the repeated
+          answer would survive a change of wording. That is the question this work asks.
         </p>
 
         <!-- Method. -->
