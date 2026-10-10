@@ -60,6 +60,10 @@ main { min-width: 0; }
 .prompt { font-size: 1.55rem; margin: 4px 0 6px; }
 .blurb { color: var(--muted); margin: 0; }
 .idline { font-size: 0.8rem; color: var(--muted); margin-top: 8px; }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 12px; font-size: 0.8rem; color: var(--muted); }
+.actions .lbl { margin-right: 2px; }
+.btn { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 6px; font: inherit; font-size: 0.8rem; padding: 4px 10px; cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
 .idline button { border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 6px; font: inherit; font-size: 0.78rem; padding: 2px 8px; cursor: pointer; margin-left: 6px; }
 .models { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
 .model { border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
@@ -110,6 +114,14 @@ footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 0 
     <span><b>FR</b> share of 30 reworded answers that match it</span>
     <span><b>π = DR × FR</b> &nbsp;deep if π &gt; 0.40</span>
     <span><b style="color:var(--hit)">●</b> answer matches the direct top answer</span>
+  </div>
+  <div class="actions" id="allbar">
+    <span class="lbl">All 23 examples:</span>
+    <button class="btn" type="button" data-all="md">Download Markdown</button>
+    <button class="btn" type="button" data-all="txt">Download text</button>
+    <button class="btn" type="button" data-all="csv">Download CSV</button>
+    <button class="btn" type="button" data-all="json">Download JSON</button>
+    <button class="btn" type="button" data-all="copy">Copy all (Markdown)</button>
   </div>
 </header>
 <div class="wrap">
@@ -207,7 +219,15 @@ function show(id) {
       <div class="kicker">${esc(g.label)}</div>
       <div class="prompt gs">“${esc(e.prompt)}”</div>
       <p class="blurb">${esc(g.blurb)}</p>
-      <div class="idline">Question id ${e.id}<button type="button" id="copy">Copy link</button></div>
+      <div class="idline">Question id ${e.id}</div>
+      <div class="actions">
+        <span class="lbl">This example:</span>
+        <button class="btn" type="button" data-one="copytxt">Copy text</button>
+        <button class="btn" type="button" data-one="copymd">Copy Markdown</button>
+        <button class="btn" type="button" data-one="md">Download .md</button>
+        <button class="btn" type="button" data-one="txt">Download .txt</button>
+        <button class="btn" type="button" data-one="link">Copy link</button>
+      </div>
     </div>
     <div class="card">
       <h2>Asked directly, 30 times</h2>
@@ -227,13 +247,103 @@ function show(id) {
   const apply = on => $("#rows").querySelectorAll("tr").forEach(tr => tr.hidden = on && tr.dataset.hit !== "true");
   apply(hitsOnly);
   $("#hits").onchange = ev => { store("hitsOnly", ev.target.checked ? "1" : "0"); apply(ev.target.checked); };
-  $("#copy").onclick = ev => {
-    const url = location.href.split("#")[0] + "#" + e.id;
-    (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(
-      () => { ev.target.textContent = "Copied"; setTimeout(() => ev.target.textContent = "Copy link", 1200); },
-      () => prompt("Link:", url));
-  };
+  $("#main").querySelectorAll("[data-one]").forEach(b => b.onclick = () => {
+    const a = b.dataset.one, slug = `deepbias_${e.id}_${short(e.prompt).replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`;
+    if (a === "copytxt") copy(b, asText(e));
+    else if (a === "copymd") copy(b, asMd(e));
+    else if (a === "md") save(`${slug}.md`, asMd(e), "text/markdown");
+    else if (a === "txt") save(`${slug}.txt`, asText(e), "text/plain");
+    else copy(b, location.href.split("#")[0] + "#" + e.id);
+  });
 }
+
+// ---- export: copy and download ----
+const NOTE = "DR = share of 30 direct answers matching the top answer; FR = share of 30 reworded answers matching it; " +
+  "pi = DR x FR (deep if pi > 0.40). Matches in the reworded answers use a simple text match; DR, FR and pi come from the paper's clustering.";
+const pct = x => x == null ? "-" : x.toFixed(2);
+const label = m => (m.type === "deep" || m.type === "shallow") ? m.type : "not biased";
+const tallyStr = m => m.tally.map(([a, c]) => `${a} x${c}`).join(", ");
+function asText(e) {
+  const L = [`QUESTION: "${e.prompt}"  (id ${e.id})`, `Group: ${G[e.group].label} - ${G[e.group].blurb}`, ""];
+  L.push("ASKED DIRECTLY, 30 TIMES");
+  for (const k of e.dcols) {
+    const m = e.models[k];
+    L.push(`- ${m.name}: top answer "${m.top}" | DR ${pct(m.dr)} | FR ${pct(m.fr)} | pi ${pct(m.pi)} | ${label(m)}`);
+    L.push(`  all 30 answers: ${tallyStr(m)}`);
+  }
+  L.push("", "REWORDED INTO 30 SCENARIOS (* = matches the direct top answer)");
+  e.reframings.forEach((r, j) => {
+    L.push(`${j + 1}. [${r.topic}] ${r.text}`);
+    for (const k of e.fcols) L.push(`   ${e.models[k].name}: ${r.ans[k][0] || "(empty)"}${r.ans[k][1] ? " *" : ""}`);
+  });
+  return L.join("\n") + "\n";
+}
+const mdc = s => String(s).replace(/\|/g, "\\|").replace(/\n/g, " ");
+function asMd(e, level = 2) {
+  const h = "#".repeat(level);
+  const L = [`${h} "${e.prompt}" (id ${e.id})`, "", `*${G[e.group].label}:* ${G[e.group].blurb}`, ""];
+  L.push("| Model | Top answer | DR | FR | π | Type |", "|---|---|---|---|---|---|");
+  for (const k of e.dcols) { const m = e.models[k]; L.push(`| ${m.name} | ${mdc(m.top)} | ${pct(m.dr)} | ${pct(m.fr)} | ${pct(m.pi)} | ${label(m)} |`); }
+  L.push("", "**Asked directly, all 30 answers:**", "");
+  for (const k of e.dcols) L.push(`- *${e.models[k].name}:* ${mdc(tallyStr(e.models[k]))}`);
+  L.push("", "**Reworded into 30 scenarios** (bold = matches the direct top answer):", "");
+  L.push(`| # | Scenario | Reworded prompt | ${e.fcols.map(k => e.models[k].name).join(" | ")} |`, `|---|---|---|${"---|".repeat(e.fcols.length)}`);
+  e.reframings.forEach((r, j) => L.push(`| ${j + 1} | ${mdc(r.topic)} | ${mdc(r.text)} | ` +
+    e.fcols.map(k => r.ans[k][1] ? `**${mdc(r.ans[k][0])}**` : mdc(r.ans[k][0])).join(" | ") + " |"));
+  return L.join("\n") + "\n";
+}
+function allMd() {
+  const L = ["# Deep and shallow bias examples", "", "Deep and shallow biases in language models (EMNLP 2026). " +
+    "Model: Olmo-3-7B-SFT replication; no example was used to train GEPA or LoRA-SFT. Data: anvo25/deep-bias.", "", NOTE, ""];
+  for (const g of DATA.groups) {
+    L.push(`## ${g.label}`, "", g.blurb, "");
+    for (const e of DATA.examples.filter(x => x.group === g.key)) L.push(asMd(e, 3));
+  }
+  return L.join("\n");
+}
+function allText() {
+  return ["DEEP AND SHALLOW BIAS EXAMPLES (EMNLP 2026)", NOTE, ""].join("\n") + "\n" +
+    DATA.examples.map(asText).join("\n" + "=".repeat(72) + "\n\n");
+}
+function allCsv() {
+  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const rows = [["id", "group", "question", "model", "kind", "index", "scenario", "prompt", "answer", "count_or_match", "top_answer", "DR", "FR", "pi", "type"]];
+  for (const e of DATA.examples) {
+    for (const k of e.dcols) {
+      const m = e.models[k];
+      for (const [a, c] of m.tally) rows.push([e.id, G[e.group].label, e.prompt, m.name, "direct", "", "", e.prompt, a, c, m.top, pct(m.dr), pct(m.fr), pct(m.pi), label(m)]);
+    }
+    e.reframings.forEach((r, j) => { for (const k of e.fcols) {
+      const m = e.models[k];
+      rows.push([e.id, G[e.group].label, e.prompt, m.name, "reworded", j + 1, r.topic, r.text, r.ans[k][0], r.ans[k][1] ? "match" : "", m.top, pct(m.dr), pct(m.fr), pct(m.pi), label(m)]);
+    }});
+  }
+  return "\ufeff" + rows.map(r => r.map(q).join(",")).join("\r\n");
+}
+function save(name, text, type) {
+  const url = URL.createObjectURL(new Blob([text], {type: type + ";charset=utf-8"}));
+  const a = Object.assign(document.createElement("a"), {href: url, download: name});
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function copy(btn, text) {
+  const done = () => { const t = btn.textContent; btn.textContent = "Copied ✓"; setTimeout(() => btn.textContent = t, 1200); };
+  const fallback = () => {
+    const ta = Object.assign(document.createElement("textarea"), {value: text});
+    ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); done(); } catch (err) { alert("Copy failed; please use a download button."); }
+    ta.remove();
+  };
+  navigator.clipboard ? navigator.clipboard.writeText(text).then(done, fallback) : fallback();
+}
+$("#allbar").querySelectorAll("[data-all]").forEach(b => b.onclick = () => {
+  const a = b.dataset.all;
+  if (a === "md") save("deepbias_examples.md", allMd(), "text/markdown");
+  else if (a === "txt") save("deepbias_examples.txt", allText(), "text/plain");
+  else if (a === "csv") save("deepbias_examples.csv", allCsv(), "text/csv");
+  else if (a === "json") save("deepbias_examples.json", JSON.stringify(DATA, null, 2), "application/json");
+  else copy(b, allMd());
+});
 $("#q").oninput = ev => { query = ev.target.value.trim(); list(); };
 window.addEventListener("hashchange", () => {
   show(location.hash.slice(1));
